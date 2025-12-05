@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodeQuiz - The Online Quiz System</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Font: Poppins -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Apply the font */
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+
+        /* Animated Gradient Background */
+        .gradient-bg {
+            background: linear-gradient(-45deg, #1f2937, #111827, #374151, #1f2937);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Screen fade-in animation */
+        .screen {
+            display: none; /* Start hidden */
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        .screen.active {
+            display: block; /* Show with animation */
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Custom styling for answer options */
+        .option-btn {
+            transition: all 0.3s ease;
+        }
+        
+        .option-btn.correct {
+            background-color: #10B981 !important; /* Green 600 */
+            color: white;
+            transform: scale(1.02);
+        }
+
+        .option-btn.incorrect {
+            background-color: #EF4444 !important; /* Red 500 */
+            color: white;
+            opacity: 0.8;
+        }
+
+        /* Leaderboard scrollbar */
+        #leaderboard-list::-webkit-scrollbar {
+            width: 8px;
+        }
+        #leaderboard-list::-webkit-scrollbar-track {
+            background: #374151; /* gray-700 */
+            border-radius: 10px;
+        }
+        #leaderboard-list::-webkit-scrollbar-thumb {
+            background: #6B7280; /* gray-500 */
+            border-radius: 10px;
+        }
+        #leaderboard-list::-webkit-scrollbar-thumb:hover {
+            background: #9CA3AF; /* gray-400 */
+        }
+    </style>
+</head>
+<body class="gradient-bg text-gray-200 flex items-center justify-center min-h-screen py-10">
+
+    <main class="container mx-auto p-4 max-w-2xl w-full">
+        <!-- Header -->
+        <header class="text-center mb-8">
+            <h1 class="text-4xl md:text-5xl font-bold text-white mb-2">
+                <span class="text-cyan-400">Code</span>Quiz
+            </h1>
+            <p class="text-lg text-gray-400">Test Your Programming Knowledge</p>
+        </header>
+
+        <!-- Main Card Container -->
+        <div class="bg-gray-800 bg-opacity-80 backdrop-blur-sm shadow-2xl rounded-2xl p-6 md:p-10 w-full min-h-[400px]">
+
+            <!-- Start Screen -->
+            <section id="start-screen" class="screen active">
+                <div class="text-center">
+                    <h2 class="text-3xl font-semibold text-white mb-4">Welcome!</h2>
+                    <p class="text-gray-300 mb-8">Enter your username and select a difficulty to begin.</p>
+                    
+                    <input type="text" id="username" placeholder="Enter your username" class="w-full bg-gray-700 text-white p-3 rounded-lg mb-2 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition duration-300">
+                    <p id="username-error" class="text-red-400 text-sm h-5 mb-3 text-left">
+                        <!-- Error message appears here -->
+                    </p>
+                    
+                    <div id="difficulty-selection" class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+                        <button onclick="startQuiz('easy')" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg w-full transition duration-300 transform hover:scale-105">Easy</button>
+                        <button onclick="startQuiz('medium')" class="bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-3 px-6 rounded-lg w-full transition duration-300 transform hover:scale-105">Medium</button>
+                        <button onclick="startQuiz('hard')" class="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg w-full transition duration-300 transform hover:scale-105">Hard</button>
+                    </div>
+                    
+                    <button onclick="showLeaderboard()" class="w-full bg-gray-600 hover:bg-gray-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-300">
+                        View Leaderboard
+                    </button>
+                </div>
+            </section>
+
+            <!-- Quiz Screen -->
+            <section id="quiz-screen" class="screen">
+                <div class="flex justify-between items-center mb-6 text-gray-400">
+                    <span class="text-sm">Question <span id="question-number" class="font-bold text-lg text-white">1</span>/<span id="total-questions" class="font-bold text-lg text-white">10</span></span>
+                    <span class="text-sm">Score: <span id="score" class="font-bold text-lg text-white">0</span></span>
+                </div>
+                
+                <div id="question-container">
+                    <p id="question-text" class="text-xl font-semibold text-white mb-6 min-h-[90px]"></p>
+                    <div id="options-container" class="grid grid-cols-1 gap-4">
+                        <!-- Options will be dynamically inserted here -->
+                    </div>
+                </div>
+                
+                <div class="mt-8 text-right">
+                    <button id="next-button" onclick="nextQuestion()" class="bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-2 px-8 rounded-lg transition duration-300 opacity-0 invisible" style="transition: opacity 0.5s;">Next</button>
+                </div>
+            </section>
+
+            <!-- Result Screen -->
+            <section id="result-screen" class="screen">
+                <div class="text-center">
+                    <h2 class="text-4xl font-bold text-white mb-4">Quiz Complete!</h2>
+                    <p class="text-2xl text-gray-300 mb-6">
+                        Well done, <span id="result-username" class="font-bold text-cyan-400"></span>!
+                    </p>
+                    <p class="text-lg text-gray-400 mb-4">Your final score is:</p>
+                    <p class="text-7xl font-bold text-white mb-10"><span id="final-score">0</span></p>
+                    
+                    <div class="flex flex-col sm:flex-row justify-center gap-4">
+                        <button onclick="restartQuiz()" class="bg-gray-600 hover:bg-gray-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-300 w-full sm:w-auto">Play Again</Gutton>
+                        <button onclick="showLeaderboard()" class="bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300 w-full sm:w-auto">View Leaderboard</button>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Leaderboard Screen -->
+            <section id="leaderboard-screen" class="screen">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold text-white text-cyan-400">Leaderboard</h2>
+                    <button onclick="showStartScreen()" class="bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-300 text-sm">
+                        &larr; Back
+                    </button>
+                </div>
+
+                <!-- Loading Spinner -->
+                <div id="leaderboard-loading" class="flex justify-center items-center h-64">
+                    <svg class="animate-spin -ml-1 mr-3 h-10 w-10 text-cyan-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                </div>
+                
+                <!-- Leaderboard List -->
+                <ul id="leaderboard-list" class="space-y-3 max-h-80 overflow-y-auto pr-2">
+                    <!-- Scores will be dynamically inserted here -->
+                </ul>
+            </section>
+        </div>
+    </main>
+    
+    <!-- This is the only script tag you need! -->
+    <script src="script.js"></script>
+</body>
+</html>
+
